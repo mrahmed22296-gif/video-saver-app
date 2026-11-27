@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://savevid-app.vercel.app/sitemap.xml
