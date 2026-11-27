@@ -37,6 +37,14 @@ jobs:
           [ -z "$F" ] && { F=android/app/src/main/java/com/savevid/app/MainActivity.java; mkdir -p $(dirname $F); }
           cp ../android-app/MainActivity.java "$F"
           sed -i 's|<application|<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />\n    <application|' android/app/src/main/AndroidManifest.xml
+          python3 - <<'PY'
+          p='android/app/src/main/AndroidManifest.xml'
+          s=open(p).read()
+          f='</intent-filter>\n            <intent-filter>\n                <action android:name="android.intent.action.SEND" />\n                <category android:name="android.intent.category.DEFAULT" />\n                <data android:mimeType="text/plain" />\n            </intent-filter>'
+          s=s.replace('</intent-filter>',f,1)
+          open(p,'w').write(s)
+          PY
+          grep -n "SEND" android/app/src/main/AndroidManifest.xml
           printf '\ndependencies {\n  implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.22"))\n}\n' >> android/app/build.gradle
           sed -i -E 's/versionCode [0-9]+/versionCode ${{ github.run_number }}/' android/app/build.gradle
           grep -n versionCode android/app/build.gradle
