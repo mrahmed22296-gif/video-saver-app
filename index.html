@@ -104,6 +104,7 @@ nav button.on svg{transform:scale(1.08)}
     <div class="lg"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg></div>
     <h1>تحميل فيديو<small>بضغطة زر، مجاناً</small></h1>
   </div>
+  <div id="upd" style="display:none;margin:12px 16px 0;padding:12px 14px;border-radius:18px;background:#fff7ed;border:2px solid #f97316;align-items:center;gap:10px;font-weight:800;color:#7c2d12;font-size:15px"><span style="flex:1" id="updt">يوجد إصدار جديد من التطبيق</span><button id="updb" type="button" style="border:none;border-radius:12px;background:linear-gradient(135deg,#fb923c,#f97316);color:#fff;font-family:inherit;font-weight:900;font-size:15px;padding:10px 14px">تحديث التطبيق</button></div>
   <div class="screens">
     <section class="screen on" id="s-home">
       <div id="empty" class="wait">
@@ -137,6 +138,8 @@ nav button.on svg{transform:scale(1.08)}
     <section class="screen" id="s-about">
       <div class="h-title"><span>عن التطبيق</span></div>
       <div class="card" style="margin-bottom:14px;line-height:2;font-size:15px">حمّل فيديوهات عامة من تيك توك وإكس وفيسبوك وانستجرام. مجاني وبدون تسجيل. الفيديوهات الخاصة غير مدعومة.</div>
+      <a id="apkdl" class="dl" href="/app" style="margin:0 0 14px"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg><span>تحميل تطبيق الأندرويد</span></a>
+      <script>if(window.NativeApp)document.getElementById('apkdl').style.display='none'</script>
       <div class="contact-card">
         <h4>من تصميم وإعداد احمد عبدالكريم</h4>
         <span>✉️ <a href="mailto:mr.ahmed22296@gmail.com">mr.ahmed22296@gmail.com</a></span>
@@ -210,6 +213,17 @@ window.onDownloaded=function(name,uri){
 };
 window.onDownloadFailed=function(){state('empty');showErr('فشل التحميل. جرب مرة ثانية.');tab('home')};
 const h0=location.hash.slice(1);if(['home','dl','about'].includes(h0))tab(h0);
+</script>
+<script>
+(function(){
+ if(!(window.NativeApp&&NativeApp.version))return;
+ const APK='https://github.com/mrahmed22296-gif/video-saver-app/releases/download/latest/savevid.apk';
+ fetch('https://api.github.com/repos/mrahmed22296-gif/video-saver-app/releases/tags/latest').then(r=>r.json()).then(j=>{
+  const n=parseInt(String(j.name||'').replace(/\D/g,''),10),cur=parseInt(NativeApp.version(),10);
+  if(n&&cur&&n>cur){const u=document.getElementById('upd');u.style.display='flex';
+   document.getElementById('updb').onclick=function(){this.textContent='جاري التحميل...';NativeApp.update(APK);setTimeout(()=>{this.textContent='تحديث التطبيق'},6000)}}
+ }).catch(()=>{});
+})();
 </script>
 </body>
 </html>
