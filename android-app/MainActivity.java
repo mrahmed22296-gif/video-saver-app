@@ -173,7 +173,6 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void onDone(String name, Uri u) {
-        toast("تم التحميل. تلاقيه في المعرض (مجلد SaveVid).");
         js("window.onDownloaded && window.onDownloaded(" + JSONObject.quote(name) + "," + JSONObject.quote(String.valueOf(u)) + ")");
     }
 
