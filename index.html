@@ -177,7 +177,7 @@ $('clr').onclick=()=>{localStorage.removeItem('hist');renderHist()};
 function showErr(t){const m=$('msg');m.textContent=t;m.style.display=t?'block':'none'}
 function state(x){$('empty').style.display=x==='empty'?'':'none';$('loading').style.display=x==='loading'?'':'none';$('res').style.display=x==='res'?'':'none'}
 let busy=false;
-async function fetchInfo(url){
+async function fetchInfo(url,auto){
   if(busy)return;busy=true;showErr('');tab('home');state('loading');
   try{
     const r=await fetch('/api/info?url='+encodeURIComponent(url));const j=await r.json();
@@ -194,6 +194,7 @@ async function fetchInfo(url){
       a.addEventListener('click',()=>addHist({...current,t:Date.now(),name:fname}));
       box.appendChild(a)});
     state('res');
+    if(auto){const a0=box.querySelector('a');if(a0)setTimeout(()=>a0.click(),400)}
   }catch{state('empty');showErr(errs.failed)}
   finally{busy=false}
 }
@@ -218,6 +219,16 @@ window.onClip=function(t){
   }catch(e){}
 };
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!window.NativeApp&&navigator.clipboard&&navigator.clipboard.readText){navigator.clipboard.readText().then(window.onClip).catch(()=>{})}});
+window.onShare=function(t){
+  try{
+    const m=String(t).match(/https?:\/\/[^\s"'<>]+/);if(!m)return;
+    const url=m[0];
+    if(window._sh===url&&Date.now()-(window._shT||0)<20000)return;
+    window._sh=url;window._shT=Date.now();
+    if(!SUP.test(url)){tab('home');state('empty');showErr('هذا الرابط غير مدعوم. المدعوم: تيك توك، إكس، فيسبوك، انستجرام.');return}
+    fetchInfo(url,true);
+  }catch(e){}
+};
 window.onDownloaded=function(name,uri){
   const h=H();const e=h.find(x=>x.name===name);if(e){e.uri=uri;localStorage.setItem('hist',JSON.stringify(h))}
   const old=document.querySelector('.toast');if(old)old.remove();
