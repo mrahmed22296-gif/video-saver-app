@@ -120,8 +120,7 @@ nav button.on svg{transform:scale(1.08)}
       </div>
       <div class="vcard" id="res" style="display:none">
         <div class="tw"><img class="thumb" id="th" alt="" hidden><span class="badge ov" id="bd"></span></div>
-        <div class="rb"><h3 id="ti"></h3><div id="links"></div>
-          <button class="soft small" id="other" type="button">فيديو ثاني</button></div>
+        <div class="rb"><h3 id="ti"></h3><div id="links"></div></div>
       </div>
       <div class="plats">
         <span class="chip"><span class="dot" style="background:#111">T</span>تيك توك</span>
@@ -198,7 +197,6 @@ async function fetchInfo(url,auto){
   }catch{state('empty');showErr(errs.failed)}
   finally{busy=false}
 }
-$('other').onclick=()=>{showErr('');state('empty')};
 $('fetchClip').onclick=async()=>{
   showErr('');
   try{const t=await navigator.clipboard.readText();const m=String(t).match(/https?:\/\/[^\s"'<>]+/);
