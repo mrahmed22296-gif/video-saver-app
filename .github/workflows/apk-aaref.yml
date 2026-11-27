@@ -1,0 +1,42 @@
+name: Build Aaref APK
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/apk-aaref.yml']
+permissions:
+  contents: write
+concurrency:
+  group: apk-aaref
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.android
+          key: android-debug-keystore-aaref-v1
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - name: Build
+        run: |
+          mkdir app && cd app
+          npm init -y >/dev/null
+          npm i @capacitor/core @capacitor/cli @capacitor/android
+          mkdir www && echo '<html><body>Loading...</body></html>' > www/index.html
+          npx cap init "اعرف شخصيتك" com.aaref.app --web-dir www
+          cat > capacitor.config.json <<JSON
+          {"appId":"com.aaref.app","appName":"اعرف شخصيتك","webDir":"www","server":{"url":"https://aaref.vercel.app","cleartext":false},"backgroundColor":"#ffffff"}
+          JSON
+          npx cap add android
+          printf '\ndependencies {\n  implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.22"))\n}\n' >> android/app/build.gradle
+          cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+      - name: Release
+        env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+        run: |
+          cp app/android/app/build/outputs/apk/debug/app-debug.apk aaref.apk
+          gh release delete aaref -y --cleanup-tag || true
+          gh release create aaref aaref.apk --title "Aaref APK" --notes "Android app (debug-signed)."
