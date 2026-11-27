@@ -204,6 +204,19 @@ $('fetchClip').onclick=async()=>{
     showErr('ما لقينا رابط فيديو منسوخ. انسخ الرابط من التطبيق وارجع هنا.')}
   catch{showErr('انسخ رابط الفيديو وارجع للتطبيق، وبيظهر لحاله.')}
 };
+const SUP=/(tiktok\.com|twitter\.com|x\.com|facebook\.com|fb\.watch|fb\.com|instagram\.com)/i;
+let lastClip=localStorage.getItem('lastClip')||'';
+window.onClip=function(t){
+  try{
+    const m=String(t).match(/https?:\/\/[^\s"'<>]+/);if(!m)return;
+    const url=m[0];if(!SUP.test(url)||busy)return;
+    if(current&&current.src===url&&$('res').style.display!=='none')return;
+    if(url===lastClip&&Date.now()-(+localStorage.getItem('lastClipT')||0)<20000)return;
+    lastClip=url;localStorage.setItem('lastClip',url);localStorage.setItem('lastClipT',Date.now());
+    fetchInfo(url);
+  }catch(e){}
+};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!window.NativeApp&&navigator.clipboard&&navigator.clipboard.readText){navigator.clipboard.readText().then(window.onClip).catch(()=>{})}});
 window.onDownloaded=function(name,uri){
   const h=H();const e=h.find(x=>x.name===name);if(e){e.uri=uri;localStorage.setItem('hist',JSON.stringify(h))}
   const old=document.querySelector('.toast');if(old)old.remove();
