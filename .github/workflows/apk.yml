@@ -1,0 +1,38 @@
+name: Build APK
+on:
+  workflow_dispatch:
+  push:
+    paths: ['android-app/**', '.github/workflows/apk.yml']
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - name: Build
+        run: |
+          mkdir app && cd app
+          npm init -y >/dev/null
+          npm i @capacitor/core @capacitor/cli @capacitor/android
+          mkdir www && echo '<html><body>Loading...</body></html>' > www/index.html
+          SITE_URL=$(cat ../android-app/url.txt)
+          npx cap init "تحميل فيديو" com.savevid.app --web-dir www
+          cat > capacitor.config.json <<JSON
+          {"appId":"com.savevid.app","appName":"تحميل فيديو","webDir":"www","server":{"url":"$SITE_URL","cleartext":false}}
+          JSON
+          npx cap add android
+          F=$(find android -name MainActivity.java 2>/dev/null | head -1)
+          [ -z "$F" ] && { F=android/app/src/main/java/com/savevid/app/MainActivity.java; mkdir -p $(dirname $F); }
+          cp ../android-app/MainActivity.java "$F"
+          cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+      - name: Release
+        env: { GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+        run: |
+          cp app/android/app/build/outputs/apk/debug/app-debug.apk savevid.apk
+          gh release delete latest -y --cleanup-tag || true
+          gh release create latest savevid.apk --title "APK" --notes "Android app (debug-signed). Install by opening this file on the phone."
