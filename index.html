@@ -61,6 +61,9 @@ body{font-family:'Tajawal',system-ui,sans-serif;background:var(--bg);color:var(-
 .item .t small{color:var(--muted);font-size:12.5px}
 .again{border:none;border-radius:14px;background:var(--chip);color:var(--primary-dark);width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
 .again svg{width:22px;height:22px}
+.again.play{background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff}
+.toast{position:fixed;left:16px;right:16px;bottom:96px;background:#0b1b30;color:#fff;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:9;font-weight:700}
+.toast button{margin-right:auto;border:none;border-radius:12px;background:#0ea5e9;color:#fff;font-family:inherit;font-weight:900;font-size:15px;padding:10px 16px}
 .empty{text-align:center;color:var(--muted);padding:60px 20px;font-size:16px;line-height:2}
 .empty svg{width:64px;height:64px;opacity:.5;margin-bottom:8px}
 .contact-card{background:#0b1b30;color:#eaf4ff;border-radius:24px;padding:22px 18px;text-align:center}
@@ -133,6 +136,7 @@ nav button.on svg{transform:scale(1.08)}
 const $=id=>document.getElementById(id);
 const errs={youtube:'يوتيوب غير مدعوم.',bad_url:'الرابط غير صحيح. تأكد إنك نسخته كامل.',failed:'ما قدرنا نجيب الفيديو. تأكد إنه عام (مش خاص) وجرب مرة ثانية.'};
 const ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg>';
+const PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
 let current=null;
 function tab(t){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==='s-'+t));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));if(t==='dl')renderHist()}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab(b.dataset.t);history.replaceState(null,'','#'+b.dataset.t)});
@@ -145,7 +149,7 @@ function renderHist(){const h=H(),box=$('hist');$('clr').style.display=h.length?
     const im=e.thumb?document.createElement('img'):document.createElement('div');if(e.thumb){im.src=e.thumb;im.alt=''}else im.className='ph';
     const t=document.createElement('div');t.className='t';const b=document.createElement('b');b.textContent=e.title||'فيديو';const s=document.createElement('small');s.textContent=(e.platform||'')+' • '+ago(e.t);t.append(b,s);
     const a=document.createElement('button');a.className='again';a.innerHTML=ARROW;a.title='تحميل مرة ثانية';a.onclick=()=>{$('u').value=e.src;tab('home');$('go').click()};
-    d.append(im,t,a);box.appendChild(d)})}
+    d.append(im,t);if(e.uri&&window.NativeApp){const p=document.createElement('button');p.className='again play';p.innerHTML=PLAY;p.title='تشغيل';p.onclick=()=>window.NativeApp.play(e.uri);d.append(p)}d.append(a);box.appendChild(d)})}
 $('clr').onclick=()=>{localStorage.removeItem('hist');renderHist()};
 function showErr(t){const m=$('msg');m.textContent=t;m.style.display=t?'block':'none'}
 $('paste').onclick=async()=>{try{$('u').value=await navigator.clipboard.readText();$('go').click()}catch{$('u').focus()}};
@@ -165,7 +169,7 @@ $('go').onclick=async()=>{
       const a=document.createElement('a');a.className='dl'+(i?' alt':'');
       a.href='/api/dl?u='+encodeURIComponent(it.url)+'&e='+it.ext+'&n='+encodeURIComponent((j.platform||'video')+'-'+Date.now().toString(36));
       a.innerHTML=(i?'':ARROW)+'<span></span>';a.lastChild.textContent=it.label+' ('+it.ext.toUpperCase()+')';
-      a.addEventListener('click',()=>addHist({...current,t:Date.now()}));
+      const fname=decodeURIComponent(a.href.split('&n=')[1]||'')+'.'+it.ext;a.addEventListener('click',()=>{if(i===0||!window.NativeApp)addHist({...current,t:Date.now(),name:fname});else addHist({...current,t:Date.now(),name:fname})});
       box.appendChild(a)});
     $('res').style.display='block';$('res').scrollIntoView({behavior:'smooth',block:'nearest'});
   }catch{showErr(errs.failed)}
@@ -184,6 +188,15 @@ window.onClip=function(t){
   }catch(e){}
 };
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!window.Capacitor&&navigator.clipboard&&navigator.clipboard.readText){navigator.clipboard.readText().then(window.onClip).catch(()=>{})}});
+
+window.onDownloaded=function(name,uri){
+  const h=H();const e=h.find(x=>x.name===name);if(e){e.uri=uri;localStorage.setItem('hist',JSON.stringify(h))}
+  const old=document.querySelector('.toast');if(old)old.remove();
+  const t=document.createElement('div');t.className='toast';t.innerHTML='<span>✅ تم التحميل</span>';
+  const b=document.createElement('button');b.textContent='▶ تشغيل';b.onclick=()=>{window.NativeApp&&window.NativeApp.play(uri);t.remove()};t.appendChild(b);
+  document.body.appendChild(t);setTimeout(()=>t.remove(),9000);
+};
+window.onDownloadFailed=function(){showErr('فشل التحميل. جرب مرة ثانية.');tab('home')};
 const h0=location.hash.slice(1);if(['home','dl','about'].includes(h0))tab(h0);
 </script>
 </body>
