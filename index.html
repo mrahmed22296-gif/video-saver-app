@@ -171,6 +171,19 @@ $('go').onclick=async()=>{
   }catch{showErr(errs.failed)}
   finally{g.disabled=false;gt.textContent='تحميل'}
 };
+
+const SUP=/(tiktok\.com|twitter\.com|x\.com|facebook\.com|fb\.watch|fb\.com|instagram\.com)/i;
+let lastClip=localStorage.getItem('lastClip')||'';
+window.onClip=function(t){
+  try{
+    const m=String(t).match(/https?:\/\/[^\s"'<>]+/);if(!m)return;
+    const url=m[0];if(!SUP.test(url)||url===lastClip)return;
+    lastClip=url;localStorage.setItem('lastClip',url);
+    tab('home');$('u').value=url;
+    if(!$('go').disabled)$('go').click();
+  }catch(e){}
+};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!window.Capacitor&&navigator.clipboard&&navigator.clipboard.readText){navigator.clipboard.readText().then(window.onClip).catch(()=>{})}});
 const h0=location.hash.slice(1);if(['home','dl','about'].includes(h0))tab(h0);
 </script>
 </body>
