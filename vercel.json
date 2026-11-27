@@ -1,1 +1,1 @@
-{"functions":{"api/*.js":{"maxDuration":60}}}
+{"functions":{"api/*.js":{"maxDuration":60}},"redirects":[{"source":"/app","destination":"https://github.com/mrahmed22296-gif/video-saver-app/releases/download/latest/savevid.apk","permanent":false}]}
