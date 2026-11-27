@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#0ea5e9">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/api/icon?s=192" type="image/png">
+<link rel="apple-touch-icon" href="/api/icon?s=192">
 <meta name="mobile-web-app-capable" content="yes">
-<title>تحميل فيديو | أداة تحميل الفيديوهات من الروابط</title>
-<meta name="description" content="تحميل فيديو: أداة مجانية لتحميل الفيديوهات من الروابط بسهولة وسرعة، مع تطبيق أندرويد.">
+<title>تحميل فيديو</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f0f9ff;--surface:#fff;--ink:#0c2942;--muted:#5b7285;--primary:#0ea5e9;--primary-dark:#0369a1;--accent:#f97316;--border:#dbeafe;--chip:#e0f2fe;--danger:#dc2626;--shadow:0 6px 20px rgba(14,60,110,.10);--bar:64px}
@@ -139,8 +141,10 @@ nav button.on svg{transform:scale(1.08)}
       <div class="h-title"><span>عن التطبيق</span></div>
       <div class="card" style="margin-bottom:14px;line-height:2;font-size:15px">حمّل فيديوهات عامة من تيك توك وإكس وفيسبوك وانستجرام. مجاني وبدون تسجيل. الفيديوهات الخاصة غير مدعومة.</div>
       <div class="card" style="margin-bottom:14px;text-align:center"><div id="chkr" style="font-size:15px;font-weight:700;margin-bottom:10px;line-height:1.8"></div><button id="chk" type="button" class="soft" style="margin:0 auto">التحقق من التحديث</button></div>
+      <button id="inst" type="button" class="dl" style="display:none;width:100%;border:none;font-family:inherit;cursor:pointer;margin:0 0 14px"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg><span>تثبيت التطبيق على الشاشة</span></button>
+      <p id="insth" style="display:none;text-align:center;color:var(--muted);font-size:13px;line-height:1.9;margin:0 0 14px">أو من قائمة المتصفح (⋮) اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».</p>
       <a id="apkdl" class="dl" href="/app" style="margin:0 0 14px"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg><span>تحميل تطبيق الأندرويد</span></a>
-      <script>if(window.NativeApp)document.getElementById('apkdl').style.display='none'</script>
+      <script>if(window.NativeApp||matchMedia('(display-mode: standalone)').matches)document.getElementById('apkdl').style.display='none';if(!window.NativeApp&&!matchMedia('(display-mode: standalone)').matches)document.getElementById('insth').style.display='block'</script>
       <div class="contact-card">
         <h4>من تصميم وإعداد احمد عبدالكريم</h4>
         <span>✉️ <a href="mailto:mr.ahmed22296@gmail.com">mr.ahmed22296@gmail.com</a></span>
@@ -237,6 +241,12 @@ window.onDownloaded=function(name,uri){
 };
 window.onDownloadFailed=function(){state('empty');showErr('فشل التحميل. جرب مرة ثانية.');tab('home')};
 const h0=location.hash.slice(1);if(['home','dl','about'].includes(h0))tab(h0);
+(function(){const p=new URLSearchParams(location.search);const t=[p.get('url'),p.get('text'),p.get('title')].filter(Boolean).join(' ');if(t){history.replaceState(null,'','/'+location.hash);setTimeout(()=>window.onShare(t),300)}})();
+let dp=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;if(!window.NativeApp)$('inst').style.display='flex'});
+window.addEventListener('appinstalled',()=>{$('inst').style.display='none';$('insth').style.display='none'});
+$('inst').onclick=async()=>{if(!dp)return;dp.prompt();try{await dp.userChoice}catch(e){}dp=null;$('inst').style.display='none'};
+if('serviceWorker' in navigator&&!window.NativeApp)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 <script>
 (function(){
