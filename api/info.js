@@ -8,6 +8,6 @@ module.exports = async (req, res) => {
     res.status(200).json(r);
   } catch (e) {
     if (e instanceof Unsupported) return res.status(422).json({ error: e.message === 'youtube' ? 'youtube' : 'bad_url' });
-    res.status(502).json({ error: 'failed' });
+    res.status(502).json({ error: 'failed', detail: String(e.message).slice(0, 120) });
   }
 };
