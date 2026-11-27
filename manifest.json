@@ -1,0 +1,22 @@
+{
+  "name": "تحميل فيديو",
+  "short_name": "تحميل فيديو",
+  "description": "حمّل فيديوهات تيك توك وإكس وفيسبوك وانستجرام بضغطة زر",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f0f9ff",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {"src": "/api/icon?s=192", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "/api/icon?s=512", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {"title": "title", "text": "text", "url": "url"}
+  }
+}
