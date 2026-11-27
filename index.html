@@ -45,7 +45,7 @@ body{font-family:'Tajawal',system-ui,sans-serif;background:var(--bg);color:var(-
 .rb{padding:14px}
 .badge{display:inline-block;background:var(--chip);color:var(--primary-dark);font-weight:700;font-size:13px;padding:4px 12px;border-radius:999px}
 .rb h3{margin:10px 0 6px;font-size:16px;line-height:1.6;font-weight:500;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.dl{display:flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;border-radius:18px;font-weight:900;font-size:19px;padding:16px;margin-top:10px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;box-shadow:0 8px 18px rgba(3,105,161,.3)}
+.dl{display:flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;border-radius:18px;font-weight:900;font-size:19px;padding:16px;margin-top:10px;background:linear-gradient(135deg,#fb923c,#f97316);color:#fff;box-shadow:0 8px 20px rgba(249,115,22,.35)}
 .dl svg{width:24px;height:24px}
 .dl.alt{background:var(--surface);color:var(--primary-dark);border:2px solid var(--primary);box-shadow:none;font-size:16px;padding:13px}
 .plats{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:20px}
@@ -182,10 +182,10 @@ async function fetchInfo(url){
     $('ti').textContent=j.title||'';$('bd').textContent=j.platform||'';
     const th=$('th');if(j.thumb){th.src=j.thumb;th.hidden=false}else th.hidden=true;
     const box=$('links');box.innerHTML='';
-    j.items.forEach((it,i)=>{
+    j.items.slice(0,1).forEach((it,i)=>{
       const a=document.createElement('a');a.className='dl'+(i?' alt':'');
       a.href='/api/dl?u='+encodeURIComponent(it.url)+'&e='+it.ext+'&n='+encodeURIComponent((j.platform||'video')+'-'+Date.now().toString(36));
-      a.innerHTML=(i?'':ARROW)+'<span></span>';a.lastChild.textContent=it.label+' ('+it.ext.toUpperCase()+')';
+      a.innerHTML=(i?'':ARROW)+'<span></span>';a.lastChild.textContent='تحميل';
       const fname=decodeURIComponent(a.href.split('&n=')[1]||'')+'.'+it.ext;
       a.addEventListener('click',()=>addHist({...current,t:Date.now(),name:fname}));
       box.appendChild(a)});
