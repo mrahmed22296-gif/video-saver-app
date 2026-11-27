@@ -72,6 +72,8 @@ public class MainActivity extends BridgeActivity {
                         while ((n = in.read(buf)) > 0) o.write(buf, 0, n);
                     }
                     if (f.length() < 1000000) throw new Exception("small");
+                    String why = checkApk(f);
+                    if (why != null) { toast(why); return; }
                     Uri u = FileProvider.getUriForFile(MainActivity.this, getPackageName() + ".fileprovider", f);
                     Intent i = new Intent(Intent.ACTION_VIEW);
                     i.setDataAndType(u, "application/vnd.android.package-archive");
@@ -200,6 +202,25 @@ public class MainActivity extends BridgeActivity {
             sendClip();
             getBridge().getWebView().postDelayed(this::sendClip, 1500);
         }
+    }
+
+    private String checkApk(File f) {
+        try {
+            PackageManager pm = getPackageManager();
+            int flag = Build.VERSION.SDK_INT >= 28 ? PackageManager.GET_SIGNING_CERTIFICATES : PackageManager.GET_SIGNATURES;
+            android.content.pm.PackageInfo ai = pm.getPackageArchiveInfo(f.getAbsolutePath(), flag);
+            if (ai == null) return "ملف التحديث تالف. جرب مرة ثانية.";
+            android.content.pm.PackageInfo cur = pm.getPackageInfo(getPackageName(), flag);
+            if (!getPackageName().equals(ai.packageName)) return "ملف التحديث لتطبيق ثاني.";
+            if (ai.versionCode <= cur.versionCode) return "أنت على آخر إصدار (" + cur.versionCode + ").";
+            if (Build.VERSION.SDK_INT >= 28 && ai.signingInfo != null && cur.signingInfo != null) {
+                android.content.pm.Signature[] a = ai.signingInfo.getApkContentsSigners();
+                android.content.pm.Signature[] b = cur.signingInfo.getApkContentsSigners();
+                if (a.length == 0 || b.length == 0 || !java.util.Arrays.equals(a[0].toByteArray(), b[0].toByteArray()))
+                    return "توقيع التحديث مختلف عن تطبيقك. احذف التطبيق وثبّت الجديد من رابط /app مرة وحدة.";
+            }
+        } catch (Exception e) { }
+        return null;
     }
 
     private volatile String pendingShare = null;
