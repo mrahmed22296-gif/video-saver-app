@@ -138,6 +138,7 @@ nav button.on svg{transform:scale(1.08)}
     <section class="screen" id="s-about">
       <div class="h-title"><span>عن التطبيق</span></div>
       <div class="card" style="margin-bottom:14px;line-height:2;font-size:15px">حمّل فيديوهات عامة من تيك توك وإكس وفيسبوك وانستجرام. مجاني وبدون تسجيل. الفيديوهات الخاصة غير مدعومة.</div>
+      <div class="card" style="margin-bottom:14px;text-align:center"><div id="chkr" style="font-size:15px;font-weight:700;margin-bottom:10px;line-height:1.8"></div><button id="chk" type="button" class="soft" style="margin:0 auto">التحقق من التحديث</button></div>
       <a id="apkdl" class="dl" href="/app" style="margin:0 0 14px"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg><span>تحميل تطبيق الأندرويد</span></a>
       <script>if(window.NativeApp)document.getElementById('apkdl').style.display='none'</script>
       <div class="contact-card">
@@ -229,13 +230,25 @@ const h0=location.hash.slice(1);if(['home','dl','about'].includes(h0))tab(h0);
 </script>
 <script>
 (function(){
- if(!(window.NativeApp&&NativeApp.version))return;
  const APK='https://github.com/mrahmed22296-gif/video-saver-app/releases/download/latest/savevid.apk';
- fetch('https://api.github.com/repos/mrahmed22296-gif/video-saver-app/releases/tags/latest').then(r=>r.json()).then(j=>{
-  const n=parseInt(String(j.name||'').replace(/\D/g,''),10),cur=parseInt(NativeApp.version(),10);
-  if(n&&cur&&n>cur){const u=document.getElementById('upd');u.style.display='flex';
-   document.getElementById('updb').onclick=function(){this.textContent='جاري التحميل...';NativeApp.update(APK);setTimeout(()=>{this.textContent='تحديث التطبيق'},6000)}}
- }).catch(()=>{});
+ const has=!!(window.NativeApp&&NativeApp.version);
+ const cur=has?parseInt(NativeApp.version(),10):0;
+ const r=document.getElementById('chkr'),b=document.getElementById('chk');
+ r.textContent=has?('رقم إصدار تطبيقك: '+cur):'هذه النسخة قديمة وما فيها التحديث. نزّل التطبيق من رابط /app وثبته مرة وحدة.';
+ if(!has){b.style.display='none'}
+ function showBanner(){const u=document.getElementById('upd');u.style.display='flex';
+  document.getElementById('updb').onclick=function(){this.textContent='جاري التحميل...';NativeApp.update(APK);setTimeout(()=>{this.textContent='تحديث التطبيق'},6000)}}
+ function check(manual){
+  if(!has)return;
+  if(manual){r.textContent='جاري التحقق...'}
+  fetch('https://api.github.com/repos/mrahmed22296-gif/video-saver-app/releases/tags/latest',{cache:'no-store'}).then(x=>x.json()).then(j=>{
+   const n=parseInt(String(j.name||'').replace(/\D/g,''),10);
+   if(n&&n>cur){showBanner();r.textContent='يوجد إصدار جديد ('+n+'). اضغط تحديث التطبيق.'}
+   else if(manual)r.textContent='تطبيقك محدّث (إصدار '+cur+').';
+  }).catch(()=>{if(manual)r.textContent='ما قدرنا نتحقق. تأكد من الإنترنت وجرب مرة ثانية.'});
+ }
+ b.onclick=()=>check(true);
+ check(false);
 })();
 </script>
 </body>
