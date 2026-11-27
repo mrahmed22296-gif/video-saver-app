@@ -254,8 +254,7 @@ if('serviceWorker' in navigator&&!window.NativeApp)navigator.serviceWorker.regis
  const has=!!(window.NativeApp&&NativeApp.version);
  const cur=has?parseInt(NativeApp.version(),10):0;
  const r=document.getElementById('chkr'),b=document.getElementById('chk');
- r.textContent=has?('رقم إصدار تطبيقك: '+cur):'هذه النسخة قديمة وما فيها التحديث. نزّل التطبيق من رابط /app وثبته مرة وحدة.';
- if(!has){b.style.display='none'}
+ if(!has){r.parentNode.style.display='none'}else r.textContent='رقم إصدار تطبيقك: '+cur;
  function showBanner(){const u=document.getElementById('upd');u.style.display='flex';
   document.getElementById('updb').onclick=function(){this.textContent='جاري التحميل...';NativeApp.update(APK);setTimeout(()=>{this.textContent='تحديث التطبيق'},6000)}}
  function check(manual){
