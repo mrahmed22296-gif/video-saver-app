@@ -184,6 +184,7 @@ public class MainActivity extends BridgeActivity {
             requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 7);
         }
         getBridge().getWebView().addJavascriptInterface(new NativeApp(), "NativeApp");
+        handleShare(getIntent());
         getBridge().getWebView().setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) -> {
             String name = URLUtil.guessFileName(url, contentDisposition, "video/mp4");
             if (!name.toLowerCase().matches(".*\\.(mp4|mp3|webm)$")) name = name.replaceAll("\\.[^.]*$", "") + ".mp4";
@@ -202,7 +203,32 @@ public class MainActivity extends BridgeActivity {
         }
     }
 
+    private volatile String pendingShare = null;
+
+    private void handleShare(Intent it) {
+        try {
+            if (it == null || !Intent.ACTION_SEND.equals(it.getAction())) return;
+            String t = it.getStringExtra(Intent.EXTRA_TEXT);
+            if (t == null || t.length() == 0 || t.length() > 4000) return;
+            final String text = t;
+            pendingShare = text;
+            it.setAction(Intent.ACTION_MAIN);
+            long[] delays = {1200, 3000, 6000};
+            for (long d : delays) {
+                getBridge().getWebView().postDelayed(() -> js("window.onShare && window.onShare(" + JSONObject.quote(text) + ")"), d);
+            }
+            getBridge().getWebView().postDelayed(() -> { pendingShare = null; }, 7000);
+        } catch (Exception ignored) { }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleShare(intent);
+    }
+
     private void sendClip() {
+        if (pendingShare != null) return;
         try {
             ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             if (cm == null || !cm.hasPrimaryClip()) return;
